@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Project-to-Income Engine</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #0d0d0d; color: #f0f0f0; min-height: 100vh; padding: 2rem 1rem; }
+    .container { max-width: 700px; margin: 0 auto; }
+    .badge { display: inline-block; background: #e8281a; color: #fff; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 4px; letter-spacing: 0.08em; margin-bottom: 10px; }
+    h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 4px; }
+    .subtitle { color: #888; font-size: 15px; margin-bottom: 2rem; }
+    .card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+    label { font-size: 13px; color: #888; display: block; margin-bottom: 6px; }
+    textarea, select {
+      width: 100%; background: #111; color: #f0f0f0; border: 1px solid #333;
+      border-radius: 8px; padding: 10px 12px; font-size: 14px; font-family: inherit;
+    }
+    textarea { min-height: 90px; resize: vertical; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+    .btn {
+      width: 100%; margin-top: 1rem; padding: 13px; background: #e8281a;
+      color: #fff; border: none; border-radius: 8px; font-size: 15px;
+      font-weight: 600; cursor: pointer; transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .loader { display: none; align-items: center; gap: 10px; color: #888; font-size: 14px; padding: 1rem 0; }
+    .loader.on { display: flex; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: #e8281a; animation: b 1.2s infinite; }
+    .dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+    @keyframes b{0%,80%,100%{transform:scale(.5);opacity:.4}40%{transform:scale(1);opacity:1}}
+    .results { display: none; flex-direction: column; gap: 1rem; }
+    .results.on { display: flex; }
+    .section-label { font-size: 11px; font-weight: 700; color: #e8281a; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px; }
+    .body-text { font-size: 14px; line-height: 1.75; color: #ddd; }
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tag { background: #222; border: 1px solid #333; border-radius: 20px; font-size: 13px; padding: 4px 14px; color: #aaa; }
+    .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .p-card { background: #111; border: 1px solid #2a2a2a; border-radius: 8px; padding: 10px 12px; }
+    .p-tier { font-size: 12px; color: #666; margin-bottom: 2px; }
+    .p-amount { font-size: 20px; font-weight: 700; color: #fff; }
+    .p-desc { font-size: 12px; color: #666; margin-top: 3px; }
+    .reset { background: none; border: none; color: #666; font-size: 13px; cursor: pointer; text-decoration: underline; margin-top: 6px; }
+    .built-by { text-align: center; color: #333; font-size: 12px; margin-top: 2rem; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="badge">VibeHack 2025</div>
+  <h1>Project-to-Income Engine</h1>
+  <p class="subtitle">From student project to monetizable idea — powered by AI</p>
+
+  <div class="card" id="form-card">
+    <label>Describe your project idea</label>
+    <textarea id="project-input" placeholder="e.g. I built a web app that tracks student study sessions and shows productivity analytics..."></textarea>
+    <div class="row">
+      <div>
+        <label>Domain / field</label>
+        <select id="domain">
+          <option value="tech">Tech / Software</option>
+          <option value="health">Health & Wellness</option>
+          <option value="education">Education</option>
+          <option value="finance">Finance</option>
+          <option value="creative">Creative / Design</option>
+          <option value="social">Social Impact</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div>
+        <label>Stage of project</label>
+        <select id="stage">
+          <option value="idea">Just an idea</option>
+          <option value="prototype">Working prototype</option>
+          <option value="mvp">MVP built</option>
+          <option value="launched">Already launched</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn" onclick="generate()">Generate income strategy →</button>
+  </div>
+
+  <div class="loader" id="loader">
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    <span>Analyzing your project with AI...</span>
+  </div>
+
+  <div class="results" id="results">
+    <div class="card">
+      <div class="section-label">Monetization paths</div>
+      <div class="body-text" id="r-monetization"></div>
+    </div>
+    <div class="card">
+      <div class="section-label">Target users</div>
+      <div class="tags" id="r-users"></div>
+    </div>
+    <div class="card">
+      <div class="section-label">Pricing idea</div>
+      <div class="pricing-grid" id="r-pricing"></div>
+    </div>
+    <div class="card">
+      <div class="section-label">Next steps (30 days)</div>
+      <div class="body-text" id="r-next"></div>
+    </div>
+    <button class="reset" onclick="reset()">← Analyze another project</button>
+  </div>
+
+  <div class="built-by">Built with Claude AI · VibeHack by Data Science Club</div>
+</div>
+
+<script>
+async function generate() {
+  const project = document.getElementById('project-input').value.trim();
+  if (!project) { alert('Please describe your project first.'); return; }
+  const domain = document.getElementById('domain').value;
+  const stage = document.getElementById('stage').value;
+
+  document.getElementById('form-card').style.display = 'none';
+  document.getElementById('loader').classList.add('on');
+  document.getElementById('results').classList.remove('on');
+
+  const prompt = `You are a startup monetization expert helping students turn projects into income.
+Domain: "${domain}", Stage: "${stage}", Project: "${project}"
+Respond ONLY with valid JSON (no markdown, no backticks):
+{
+  "monetization": "3-4 sentences with 2-3 concrete monetization strategies for this project",
+  "users": ["5 to 7 specific target user segments as short phrases"],
+  "pricing": [
+    {"tier": "Free", "amount": "$0/mo", "desc": "basic feature"},
+    {"tier": "Pro", "amount": "$X/mo", "desc": "main feature"},
+    {"tier": "Team", "amount": "$Y/mo", "desc": "team feature"}
+  ],
+  "next": "3 concrete numbered action steps they can take in 30 days to start earning"
+}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content.map(i => i.text || '').join('').replace(/```json|```/g, '').trim();
+    const p = JSON.parse(text);
+
+    document.getElementById('r-monetization').textContent = p.monetization;
+
+    const usersEl = document.getElementById('r-users');
+    usersEl.innerHTML = '';
+    p.users.forEach(u => { usersEl.innerHTML += `<span class="tag">${u}</span>`; });
+
+    const pricingEl = document.getElementById('r-pricing');
+    pricingEl.innerHTML = '';
+    p.pricing.forEach(x => {
+      pricingEl.innerHTML += `<div class="p-card"><div class="p-tier">${x.tier}</div><div class="p-amount">${x.amount}</div><div class="p-desc">${x.desc}</div></div>`;
+    });
+
+    document.getElementById('r-next').textContent = p.next;
+
+    document.getElementById('loader').classList.remove('on');
+    document.getElementById('results').classList.add('on');
+  } catch(e) {
+    document.getElementById('loader').classList.remove('on');
+    document.getElementById('form-card').style.display = 'block';
+    alert('API error. Check your internet and try again.');
+  }
+}
+
+function reset() {
+  document.getElementById('results').classList.remove('on');
+  document.getElementById('project-input').value = '';
+  document.getElementById('form-card').style.display = 'block';
+}
+</script>
+</body>
+</html>
